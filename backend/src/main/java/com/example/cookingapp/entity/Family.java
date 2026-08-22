@@ -7,9 +7,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "users")
+@Table(name = "families")
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+public class Family {
 
   // ① id
   @Id
@@ -17,16 +17,8 @@ public class User {
   private Long id;
 
   // ② name
-  @Column(name = "name", nullable = false, length = 50)
+  @Column(name = "name", nullable = false, length = 100)
   private String name;
-
-  // ③ email
-  @Column(name = "email", nullable = false, unique = true, length = 254)
-  private String email;
-
-  // ④ passwordHash
-  @Column(name = "password_hash", nullable = false, length = 255)
-  private String passwordHash;
 
   // ⑤ createdAt
   @CreatedDate
