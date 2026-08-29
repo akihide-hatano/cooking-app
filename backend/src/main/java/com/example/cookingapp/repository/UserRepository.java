@@ -1,5 +1,6 @@
-package com.example.cookingapp.entity;
+package com.example.cookingapp.repository;
 
+import com.example.cookingapp.entity.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -47,4 +47,14 @@ public class User {
   // ⑦ deletedAt
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
+
+  protected User() {
+    // JPA用のデフォルトコンストラクタ
+  }
+
+  public User(String name, String email, String passwordHash) {
+    this.name = name;
+    this.email = email;
+    this.passwordHash = passwordHash;
+  }
 }
