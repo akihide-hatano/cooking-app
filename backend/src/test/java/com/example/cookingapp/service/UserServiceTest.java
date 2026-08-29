@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class UserServiceTest {
 
   @Test
-  void 新規ユーザー登録が成功すること() {
+  void registerUserSucceedsForNewUser() {
 
     // 偽物を作る
     UserRepository userRepository = Mockito.mock(UserRepository.class);
