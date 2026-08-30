@@ -9,6 +9,7 @@ import com.example.cookingapp.config.SecurityConfig;
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.service.UserService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -38,14 +39,41 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                                        {
-                                          "name": "testuser",
-                                          "email": "testuser@example.com",
-                                          "password": "password123"
-                                        }
-                                        """))
+                                            {
+                                              "name": "testuser",
+                                              "email": "testuser@example.com",
+                                              "password": "password123"
+                                            }
+                                            """))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.name").value(user.getName()))
         .andExpect(jsonPath("$.email").value(user.getEmail()));
+  }
+
+  @Test
+  void loginReturnsOkForValidRequest() throws Exception {
+
+    User user = new User("testuser", "testuser@example.com", "hashed-password");
+
+    Mockito.when(userService.loginUser("testuser@example.com", "password123")).thenReturn(user);
+
+    mockMvc
+        .perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                                            {
+                                              "email": "testuser@example.com",
+                                              "password": "password123"
+                                            }
+                                            """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("testuser"))
+        .andExpect(jsonPath("$.email").value("testuser@example.com"))
+        .andExpect(jsonPath("$.password").doesNotExist())
+        .andExpect(jsonPath("$.passwordHash").doesNotExist());
+
+    Mockito.verify(userService).loginUser("testuser@example.com", "password123");
   }
 }

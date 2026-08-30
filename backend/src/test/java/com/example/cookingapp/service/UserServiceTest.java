@@ -54,4 +54,87 @@ class UserServiceTest {
           userService.registerUser("テスト太郎", "test@example.com", "password123");
         });
   }
+
+  @Test
+  void loginUserSucceedsForValidCredentials() {
+
+    // 偽物を作る
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    // テスト対象を作る
+    UserService userService = new UserService(userRepository, passwordEncoder);
+    User existingUser = new User("既存ユーザー", "test@example.com", "hashed-password");
+
+    // emailが存在することにする
+    Mockito.when(userRepository.findByEmail("test@example.com"))
+        .thenReturn(Optional.of(existingUser));
+
+    // passwordが一致することにする
+    Mockito.when(passwordEncoder.matches("password123", "hashed-password")).thenReturn(true);
+
+    // 実際にログイン処理を実行
+    User result = userService.loginUser("test@example.com", "password123");
+
+    // ログインが成功したことを確認
+    Assertions.assertEquals(existingUser, result);
+    Mockito.verify(userRepository).findByEmail("test@example.com");
+    Mockito.verify(passwordEncoder).matches("password123", "hashed-password");
+  }
+
+  @Test
+  void loginUserFailsWhenEmailNotFound() {
+
+    // 偽物を作る
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    // テスト対象を作る
+    UserService userService = new UserService(userRepository, passwordEncoder);
+
+    // emailが存在しないことにする
+    Mockito.when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+    // 実際にログイン処理を実行して例外が投げられることを確認
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          userService.loginUser("test@example.com", "password123");
+        });
+
+    Mockito.verify(userRepository).findByEmail("test@example.com");
+    Mockito.verify(passwordEncoder, Mockito.never())
+        .matches(Mockito.anyString(), Mockito.anyString());
+  }
+
+  @Test
+  void loginUserFailsWhenPasswordNotMatch() {
+
+    // 偽物を作る
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    // テスト対象を作る
+    UserService userService = new UserService(userRepository, passwordEncoder);
+
+    // DBに存在していることにするユーザー
+    User existingUser = new User("既存ユーザー", "test@example.com", "hashed-password");
+
+    // emailが存在することにする
+    Mockito.when(userRepository.findByEmail("test@example.com"))
+        .thenReturn(Optional.of(existingUser));
+
+    // passwordが一致しないことにする
+    Mockito.when(passwordEncoder.matches("password123", "hashed-password")).thenReturn(false);
+
+    // 実際にログイン処理を実行して例外が投げられることを確認
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          userService.loginUser("test@example.com", "password123");
+        });
+
+    Mockito.verify(userRepository).findByEmail("test@example.com");
+    Mockito.verify(passwordEncoder).matches("password123", "hashed-password");
+  }
 }

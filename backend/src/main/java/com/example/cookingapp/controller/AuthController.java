@@ -1,5 +1,7 @@
 package com.example.cookingapp.controller;
 
+import com.example.cookingapp.dto.LoginRequest;
+import com.example.cookingapp.dto.LoginResponse;
 import com.example.cookingapp.dto.RegisterRequest;
 import com.example.cookingapp.dto.RegisterResponse;
 import com.example.cookingapp.entity.User;
@@ -28,5 +30,13 @@ public class AuthController {
 
     RegisterResponse response = new RegisterResponse(user.getId(), user.getName(), user.getEmail());
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+    User user = userService.loginUser(request.getEmail(), request.getPassword());
+
+    LoginResponse response = new LoginResponse(user.getId(), user.getName(), user.getEmail());
+    return ResponseEntity.ok(response);
   }
 }
