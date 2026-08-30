@@ -29,4 +29,19 @@ public class UserService {
     userRepository.save(user);
     return user;
   }
+
+  public User loginUser(String email, String password) {
+
+
+    // emailでユーザーを検索
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません"));
+
+    // パスワードを検証
+    if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+      throw new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません");
+    }
+
+    return user;
+  }
 }
