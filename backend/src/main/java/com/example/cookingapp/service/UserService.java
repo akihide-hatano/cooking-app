@@ -66,12 +66,6 @@ public class UserService {
       throw new IllegalArgumentException("Emailが既に存在します");
     }
 
-    //名前が一緒の場合は更新しない
-    if (user.getName().equals(name)) {
-      throw new IllegalArgumentException("名前が同じです");
-    }
-
-
     // ユーザー情報を更新
     user.updateName(name);
     user.updateEmail(email);
