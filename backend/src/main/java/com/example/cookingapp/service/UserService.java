@@ -35,9 +35,9 @@ public class UserService {
 
     // emailでユーザーを検索
     User user =
-            userRepository
-                    .findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません"));
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません"));
 
     // パスワードを検証
     if (!passwordEncoder.matches(password, user.getPasswordHash())) {
@@ -50,18 +50,19 @@ public class UserService {
   public User getUser(Long id) {
 
     // IDでユーザーを検索
-    User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
+    User user =
+        userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
     return user;
   }
 
-  //userを更新する
+  // userを更新する
   @Transactional
-  public User updateUser(Long id, String name, String email, String password) {
+  public User updateUser(Long id, String name, String email) {
 
     // 更新するユーザーを取得
     User user = getUser(id);
 
-    //emailが変更される場合、既に存在するか確認
+    // emailが変更される場合、既に存在するか確認
     if (!user.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
       throw new IllegalArgumentException("Emailが既に存在します");
     }
@@ -71,5 +72,16 @@ public class UserService {
     user.updateEmail(email);
 
     return user;
+  }
+
+  // userを削除する(論理削除)
+  @Transactional
+  public void deleteUser(Long id) {
+
+    // 削除するユーザーを取得
+    User user = getUser(id);
+
+    // ユーザーを削除(論理削除)
+    user.delete();
   }
 }
