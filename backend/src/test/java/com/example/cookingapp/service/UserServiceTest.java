@@ -137,4 +137,49 @@ class UserServiceTest {
     Mockito.verify(userRepository).findByEmail("test@example.com");
     Mockito.verify(passwordEncoder).matches("password123", "hashed-password");
   }
+
+  @Test
+  void getUserSucceedsForExistingUser() {
+    // 偽物を作る
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    // テスト対象を作る
+    UserService userService = new UserService(userRepository, passwordEncoder);
+    User existingUser = new User("既存ユーザー", "test@example.com", "hashed-password");
+
+    // IDが存在することにする
+    Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+
+    // 実際に取得処理を実行
+    User result = userService.getUser(1L);
+
+    // 取得が成功したことを確認
+    Assertions.assertEquals(existingUser, result);
+    Mockito.verify(userRepository).findById(1L);
+  }
+
+  // userが存在しない場合のテスト
+  @Test
+  void getUserFailsForNonExistingUser() {
+    // 偽物を作る
+    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    // テスト対象を作る
+    UserService userService = new UserService(userRepository, passwordEncoder);
+
+    // IDが存在しないことにする
+    Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+    // 実際に取得処理を実行して例外が投げられることを確認
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          userService.getUser(1L);
+        });
+
+    // RepositoryのfindByIdが呼ばれたことを確認
+    Mockito.verify(userRepository).findById(1L);
+  }
 }

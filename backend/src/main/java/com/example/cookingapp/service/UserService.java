@@ -2,6 +2,7 @@ package com.example.cookingapp.service;
 
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,5 +45,43 @@ public class UserService {
     }
 
     return user;
+  }
+
+  public User getUser(Long id) {
+
+    // IDでユーザーを検索
+    User user =
+        userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
+    return user;
+  }
+
+  // userを更新する
+  @Transactional
+  public User updateUser(Long id, String name, String email) {
+
+    // 更新するユーザーを取得
+    User user = getUser(id);
+
+    // emailが変更される場合、既に存在するか確認
+    if (!user.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+      throw new IllegalArgumentException("Emailが既に存在します");
+    }
+
+    // ユーザー情報を更新
+    user.updateName(name);
+    user.updateEmail(email);
+
+    return user;
+  }
+
+  // userを削除する(論理削除)
+  @Transactional
+  public void deleteUser(Long id) {
+
+    // 削除するユーザーを取得
+    User user = getUser(id);
+
+    // ユーザーを削除(論理削除)
+    user.delete();
   }
 }
