@@ -11,6 +11,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuthServiceTest {
@@ -66,8 +67,7 @@ class AuthServiceTest {
     // emailで検索したらUserが返ってこないようにmockする
     when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
-    /// logginすると例外を投げることを確認する
-
+    // logginすると例外を投げることを確認する
     IllegalArgumentException exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -76,5 +76,47 @@ class AuthServiceTest {
             });
 
     assertEquals("メールアドレスまたはパスワードが正しくありません", exception.getMessage());
+  }
+
+  // パスワードが一致しない場合のテスト
+  @Test
+  void testLoginFailsWhenPasswordDoesNotMatch() {
+
+    // 必要なdataをmockする
+    UserRepository userRepository = mock(UserRepository.class);
+    PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+
+    // テスト対象のloginメソッドを呼び出す
+    AuthService authService = new AuthService(userRepository, passwordEncoder);
+
+    // 画面のログイン画面から入力されたemailとpasswordを受け取り、ユーザー認証を行う
+    LoginRequest request = new LoginRequest();
+    request.setEmail("test@example.com");
+    request.setPassword("wrongPassword");
+
+    // DBに存在するユーザーをmockする
+    User user = mock(User.class);
+
+    // UserのPasswordHashをmockする
+    when(user.getPasswordHash()).thenReturn("hashedPassword");
+
+    // emailで検索したらUserが返ってくるようにmockする
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+    // UserのemailとpasswordHashが照合しないようにmockする
+    when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
+
+    // loginすると例外を投げることを確認する
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              authService.login(request);
+            });
+
+    assertEquals("メールアドレスまたはパスワードが正しくありません", exception.getMessage());
+
+    // 絶対にmatchesで確認したことを証明する
+    verify(passwordEncoder).matches("wrongPassword", "hashedPassword");
   }
 }
