@@ -1,6 +1,7 @@
 package com.example.cookingapp.service;
 
 import com.example.cookingapp.dto.LoginRequest;
+import com.example.cookingapp.dto.LoginResponse;
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
 
-  public String login(LoginRequest request) {
+  public LoginResponse login(LoginRequest request) {
 
     // emailでユーザーを検索し、存在しなければ例外を投げる
     User user =
@@ -28,6 +29,7 @@ public class AuthService {
     }
 
     // ログイン成功の場合、JWTトークンを返す
-    return jwtService.generateToken(user.getId());
+    String token = jwtService.generateToken(user.getId());
+    return new LoginResponse(user.getId(), user.getName(), user.getEmail(), token);
   }
 }

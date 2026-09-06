@@ -1,18 +1,20 @@
 package com.example.cookingapp.service;
 
-import com.example.cookingapp.dto.LoginRequest;
-import com.example.cookingapp.entity.User;
-import com.example.cookingapp.repository.UserRepository;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.example.cookingapp.dto.LoginRequest;
+import com.example.cookingapp.dto.LoginResponse;
+import com.example.cookingapp.entity.User;
+import com.example.cookingapp.repository.UserRepository;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 class AuthServiceTest {
 
@@ -34,10 +36,12 @@ class AuthServiceTest {
     // DBに存在するユーザーをmockする
     User user = mock(User.class);
 
-    //UserのIDをmockする
+    // UserのIDをmockする
     when(user.getId()).thenReturn(1L);
 
     // UserのPasswordHashをmockする
+    when(user.getName()).thenReturn("Test User");
+    when(user.getEmail()).thenReturn("test@example.com");
     when(user.getPasswordHash()).thenReturn("hashedPassword");
 
     // emailで検索したらUserが返ってくるようにmockする
@@ -46,14 +50,19 @@ class AuthServiceTest {
     // UserのemailとpasswordHashが照合する
     when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
 
-    //JWTトークンをmockする
+    // JWTトークンをmockする
     when(jwtService.generateToken(1L)).thenReturn("mocked-jwt-token");
 
     // loinメソッドを呼び出す
-    String result = authService.login(request);
+    LoginResponse result = authService.login(request);
+
+    // resutのUser情報が正しいことを確認する
+    assertEquals(1L, result.getId());
+    assertEquals("Test User", result.getName());
+    assertEquals("test@example.com", result.getEmail());
 
     // loginメソッドの戻り値がJWTトークンであることを確認する
-    assertEquals("mocked-jwt-token", result);
+    assertEquals("mocked-jwt-token", result.getToken());
 
     // 絶対にgenerateTokenでJWTトークンを生成したことを証明する
     verify(jwtService).generateToken(1L);
@@ -78,7 +87,7 @@ class AuthServiceTest {
     // emailで検索したらUserが返ってこないようにmockする
     when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
-    // logginすると例外を投げることを確認する
+    // loginすると例外を投げることを確認する
     IllegalArgumentException exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -87,6 +96,8 @@ class AuthServiceTest {
             });
 
     assertEquals("メールアドレスまたはパスワードが正しくありません", exception.getMessage());
+
+    verify(jwtService, never()).generateToken(anyLong());
   }
 
   // パスワードが一致しない場合のテスト
@@ -130,5 +141,7 @@ class AuthServiceTest {
 
     // 絶対にmatchesで確認したことを証明する
     verify(passwordEncoder).matches("wrongPassword", "hashedPassword");
+
+    verify(jwtService, never()).generateToken(anyLong());
   }
 }

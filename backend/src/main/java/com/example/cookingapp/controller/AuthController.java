@@ -5,6 +5,7 @@ import com.example.cookingapp.dto.LoginResponse;
 import com.example.cookingapp.dto.RegisterRequest;
 import com.example.cookingapp.dto.RegisterResponse;
 import com.example.cookingapp.entity.User;
+import com.example.cookingapp.service.AuthService;
 import com.example.cookingapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final UserService userService;
+  private final AuthService authService;
 
   @PostMapping("/register")
   public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest request) {
@@ -34,9 +36,10 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
-    User user = userService.loginUser(request.getEmail(), request.getPassword());
 
-    LoginResponse response = new LoginResponse(user.getId(), user.getName(), user.getEmail());
+    // 一度responseにユーザー情報を入れるために、userServiceを使ってユーザー情報を取得する
+    LoginResponse response = authService.login(request);
+
     return ResponseEntity.ok(response);
   }
 }
