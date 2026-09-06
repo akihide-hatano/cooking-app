@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 public class AuthService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
 
-  public User login(LoginRequest request) {
+  public String login(LoginRequest request) {
 
     // emailでユーザーを検索し、存在しなければ例外を投げる
     User user =
@@ -26,7 +27,7 @@ public class AuthService {
       throw new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません");
     }
 
-    // ログイン成功の場合、ユーザー情報を返す
-    return user;
+    // ログイン成功の場合、JWTトークンを返す
+    return jwtService.generateToken(user.getId());
   }
 }

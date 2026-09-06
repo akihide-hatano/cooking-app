@@ -21,9 +21,10 @@ class AuthServiceTest {
     // 必要なdataをmockする
     UserRepository userRepository = mock(UserRepository.class);
     PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+    JwtService jwtService = mock(JwtService.class);
 
     // テスト対象のloginメソッドを呼び出す
-    AuthService authService = new AuthService(userRepository, passwordEncoder);
+    AuthService authService = new AuthService(userRepository, passwordEncoder, jwtService);
 
     // 画面のログイン画面から入力されたemailとpasswordを受け取り、ユーザー認証を行う
     LoginRequest request = new LoginRequest();
@@ -32,6 +33,9 @@ class AuthServiceTest {
 
     // DBに存在するユーザーをmockする
     User user = mock(User.class);
+
+    //UserのIDをmockする
+    when(user.getId()).thenReturn(1L);
 
     // UserのPasswordHashをmockする
     when(user.getPasswordHash()).thenReturn("hashedPassword");
@@ -42,11 +46,17 @@ class AuthServiceTest {
     // UserのemailとpasswordHashが照合する
     when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
 
-    // loinメソッドを呼び出す
-    User result = authService.login(request);
+    //JWTトークンをmockする
+    when(jwtService.generateToken(1L)).thenReturn("mocked-jwt-token");
 
-    // DBから取得したUserと、loginメソッドの戻り値が一致することを確認する
-    assertEquals(user, result);
+    // loinメソッドを呼び出す
+    String result = authService.login(request);
+
+    // loginメソッドの戻り値がJWTトークンであることを確認する
+    assertEquals("mocked-jwt-token", result);
+
+    // 絶対にgenerateTokenでJWTトークンを生成したことを証明する
+    verify(jwtService).generateToken(1L);
   }
 
   @Test
@@ -55,9 +65,10 @@ class AuthServiceTest {
     // 必要なdataをmockする
     UserRepository userRepository = mock(UserRepository.class);
     PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+    JwtService jwtService = mock(JwtService.class);
 
     // テスト対象のloginメソッドを呼び出す
-    AuthService authService = new AuthService(userRepository, passwordEncoder);
+    AuthService authService = new AuthService(userRepository, passwordEncoder, jwtService);
 
     // 画面のログイン画面から入力されたemailとpasswordを受け取り、ユーザー認証を行う
     LoginRequest request = new LoginRequest();
@@ -85,9 +96,10 @@ class AuthServiceTest {
     // 必要なdataをmockする
     UserRepository userRepository = mock(UserRepository.class);
     PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
+    JwtService jwtService = mock(JwtService.class);
 
     // テスト対象のloginメソッドを呼び出す
-    AuthService authService = new AuthService(userRepository, passwordEncoder);
+    AuthService authService = new AuthService(userRepository, passwordEncoder, jwtService);
 
     // 画面のログイン画面から入力されたemailとpasswordを受け取り、ユーザー認証を行う
     LoginRequest request = new LoginRequest();
