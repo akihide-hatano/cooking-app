@@ -1,15 +1,10 @@
 package com.example.cookingapp.controller;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.example.cookingapp.config.SecurityConfig;
-import com.example.cookingapp.dto.LoginRequest;
 import com.example.cookingapp.dto.LoginResponse;
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.service.AuthService;
+import com.example.cookingapp.service.JwtService;
 import com.example.cookingapp.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,6 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(AuthController.class)
 @Import(SecurityConfig.class)
 class AuthControllerTest {
@@ -28,6 +28,7 @@ class AuthControllerTest {
 
   @MockitoBean private UserService userService;
   @MockitoBean private AuthService authService;
+  @MockitoBean private JwtService jwtService;
 
   @Test
   void registerReturnsCreatedForValidRequest() throws Exception {
@@ -78,7 +79,5 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.email").value("testuser@example.com"))
         .andExpect(jsonPath("$.password").doesNotExist())
         .andExpect(jsonPath("$.passwordHash").doesNotExist());
-
-    when(authService.login(Mockito.any(LoginRequest.class))).thenReturn(loginResponse);
   }
 }
