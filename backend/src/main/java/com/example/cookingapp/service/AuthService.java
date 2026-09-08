@@ -1,0 +1,35 @@
+package com.example.cookingapp.service;
+
+import com.example.cookingapp.dto.LoginRequest;
+import com.example.cookingapp.dto.LoginResponse;
+import com.example.cookingapp.entity.User;
+import com.example.cookingapp.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
+
+  public LoginResponse login(LoginRequest request) {
+
+    // emailでユーザーを検索し、存在しなければ例外を投げる
+    User user =
+        userRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません"));
+
+    // パスワードを検証し、正しくなければ例外を投げる
+    if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+      throw new IllegalArgumentException("メールアドレスまたはパスワードが正しくありません");
+    }
+
+    // ログイン成功の場合、JWTトークンを返す
+    String token = jwtService.generateToken(user.getId());
+    return new LoginResponse(user.getId(), user.getName(), user.getEmail(), token);
+  }
+}
