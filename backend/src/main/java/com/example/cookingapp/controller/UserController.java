@@ -1,6 +1,6 @@
 package com.example.cookingapp.controller;
 
-
+import com.example.cookingapp.dto.MeResponse;
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-        private final UserService userService;
-    @GetMapping("/me")
-    public User getMe(Authentication authentication) {
+  private final UserService userService;
 
-        Long userId = Long.parseLong(authentication.getName());
-        return  userService.getUser(userId);
-    }
+  @GetMapping("/me")
+  public MeResponse getMe(Authentication authentication) {
+
+    Long userId = Long.parseLong(authentication.getName());
+    User user = userService.getUser(userId);
+
+    return new MeResponse(user.getId(), user.getName(), user.getEmail());
+  }
 }
