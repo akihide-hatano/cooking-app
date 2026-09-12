@@ -1,6 +1,8 @@
 package com.example.cookingapp.controller;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -68,5 +70,14 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.name").value("updateduser"))
         .andExpect(jsonPath("$.email").value("updateduser@example.com"))
         .andExpect(jsonPath("$.passwordHash").doesNotExist());
+  }
+
+  @Test
+  @WithMockUser(username = "1")
+  void deleteMeReturnsNoContent() throws Exception {
+
+    mockMvc.perform(delete("/api/users/me")).andExpect(status().isNoContent());
+
+    verify(userService).deleteUser(1L);
   }
 }
