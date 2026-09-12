@@ -9,6 +9,7 @@ public class LoginResponse {
 
   private final Long id;
   private final String name;
+
   private final String email;
   private final String token;
 }
