@@ -2,3 +2,8 @@
 
 cd frontend
 npx lint-staged
+
+cd ../backend
+./gradlew spotlessApply
+git add src
+./gradlew compileJava
