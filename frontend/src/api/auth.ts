@@ -14,7 +14,8 @@ export const login = async (request: LoginRequest): Promise<LoginResponse> => {
   });
 
   if (!response.ok) {
-    throw new Error("Login failed");
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Login failed");
   }
 
   return response.json() as Promise<LoginResponse>;
@@ -30,6 +31,7 @@ export const register = async (request: RegisterRequest): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error("Registration failed");
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Registration failed");
   }
 };

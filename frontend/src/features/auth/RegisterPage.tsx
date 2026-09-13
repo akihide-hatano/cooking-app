@@ -16,7 +16,11 @@ export const RegisterPage = () => {
       setSuccessMessage("登録が成功しました");
     } catch (error) {
       console.error("Registration failed:", error);
-      setErrorMessage("登録に失敗しました");
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("登録に失敗しました");
+      }
     }
   };
 
