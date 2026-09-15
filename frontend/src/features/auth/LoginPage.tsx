@@ -5,13 +5,27 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const handleLogin = async () => {
     // Implement login logic here
     try {
+      //欲しいdataをloginから取得する
       const response = await login({ email, password });
       console.log("Login successful:", response);
+
+      //strageへtokenを保存する
+      localStorage.setItem("token", response.token);
+
+      //setsuccessメッセージを表示する
+      setSuccess("ログインに成功しました");
+      setError("");
     } catch (error) {
       console.error("Login failed:", error);
+      setError((error as Error).message || "ログインに失敗しました");
+      //setsuccessメッセージを非表示にする
+      setSuccess("");
     }
   };
 
@@ -50,6 +64,8 @@ export const LoginPage = () => {
       >
         Login
       </button>
+      {error && <p className="text-red-500">{error}</p>}
+      {success && <p className="text-green-500">{success}</p>}
     </div>
   );
 };
