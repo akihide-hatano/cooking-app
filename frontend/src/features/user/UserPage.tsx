@@ -4,6 +4,8 @@ import { getMe } from "../../api/user";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 
+import { Link } from "react-router-dom";
+
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
@@ -39,10 +41,33 @@ export const UserPage = () => {
 
       {user && (
         <div className="mt-4">
-          <p>Name: {user.name}</p>
-          <p>Email: {user.email}</p>
+          <p className="text-xl">名前: {user.name}</p>
+          <p className="mt-2 text-gray-600">今日は何をしましょうか？</p>
         </div>
       )}
+
+      <div className="flex gap-4 mt-8">
+        <Link
+          to="/recipes/new"
+          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+        >
+          レシピを投稿
+        </Link>
+
+        <Link
+          to="/recipes"
+          className="border px-6 py-3 rounded-lg hover:bg-gray-100"
+        >
+          自分のレシピ
+        </Link>
+
+        <Link
+          to="/favorites"
+          className="border px-6 py-3 rounded-lg hover:bg-gray-100"
+        >
+          お気に入り
+        </Link>
+      </div>
 
       <h2 className="text-2xl font-bold mt-10 mb-4">家族のレシピ</h2>
 

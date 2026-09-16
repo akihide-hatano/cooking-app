@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { login } from "../../api/auth";
+import { Link, useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -17,6 +19,7 @@ export const LoginPage = () => {
 
       //strageへtokenを保存する
       localStorage.setItem("token", response.token);
+      navigate("/user");
 
       //setsuccessメッセージを表示する
       setSuccess("ログインに成功しました");
@@ -66,6 +69,13 @@ export const LoginPage = () => {
       </button>
       {error && <p className="text-red-500">{error}</p>}
       {success && <p className="text-green-500">{success}</p>}
+
+      <p className="mt-4 text-sm text-gray-600">
+        アカウントをお持ちでないですか？{" "}
+        <Link to="/register" className="text-blue-500 hover:underline">
+          新規登録はこちら
+        </Link>
+      </p>
     </div>
   );
 };
