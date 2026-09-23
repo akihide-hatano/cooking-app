@@ -64,4 +64,43 @@ public class RecipeService {
     Recipe savedRecipe = recipeRepository.save(recipe);
     return savedRecipe;
   }
+
+  // recipeRepositoryを使ってrecipeを取得するメソッドを作成する
+  public Recipe getRecipe(Long recipeId) {
+    // recipeIdを使ってrecipeを取得する
+    Recipe recipe =
+        recipeRepository
+            .findById(recipeId)
+            .orElseThrow(() -> new IllegalArgumentException("レシピが見つかりません"));
+
+    // Authenticationからユーザーを取得する
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    // userIdを取得する
+    String userId = authentication.getPrincipal().toString();
+
+    // Longに変換する
+    Long userIdLong = Long.parseLong(userId);
+
+    // RecipeがvisibilityがPRIVATEの場合は、Userがrecipeのuserと同じでない場合は例外を投げる
+    RecipeVisibility visibility = recipe.getVisibility();
+    if (visibility == RecipeVisibility.PRIVATE && !recipe.getUser().getId().equals(userIdLong)) {
+      throw new IllegalArgumentException("このレシピは非公開です");
+    }
+
+    // RecipeがvisibilityがFAMILYの場合は、Userがrecipeのfamilyに属していない場合は例外を投げる
+    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    boolean belongsToFamily = false;
+
+    for (FamilyMember familyMember : familyMembers) {
+      if (familyMember.getFamily().getId().equals(recipe.getFamily().getId())) {
+        belongsToFamily = true;
+        break;
+      }
+    }
+    if (visibility == RecipeVisibility.FAMILY && !belongsToFamily) {
+      throw new IllegalArgumentException("このレシピは家族限定です");
+    }
+    return recipe;
+  }
 }
