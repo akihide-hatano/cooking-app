@@ -59,4 +59,19 @@ public class User {
     this.email = email;
     this.passwordHash = passwordHash;
   }
+
+  // user名のupdateメソッド
+  public void updateName(String name) {
+    this.name = name;
+  }
+
+  // userのemailのupdateメソッド
+  public void updateEmail(String email) {
+    this.email = email;
+  }
+
+  // userの削除メソッド(論理削除)
+  public void delete() {
+    this.deletedAt = LocalDateTime.now();
+  }
 }

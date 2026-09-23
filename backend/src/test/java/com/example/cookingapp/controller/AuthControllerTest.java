@@ -6,7 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.cookingapp.config.SecurityConfig;
+import com.example.cookingapp.dto.LoginResponse;
 import com.example.cookingapp.entity.User;
+import com.example.cookingapp.service.AuthService;
+import com.example.cookingapp.service.JwtService;
 import com.example.cookingapp.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,6 +27,8 @@ class AuthControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean private UserService userService;
+  @MockitoBean private AuthService authService;
+  @MockitoBean private JwtService jwtService;
 
   @Test
   void registerReturnsCreatedForValidRequest() throws Exception {
@@ -53,9 +58,10 @@ class AuthControllerTest {
   @Test
   void loginReturnsOkForValidRequest() throws Exception {
 
-    User user = new User("testuser", "testuser@example.com", "hashed-password");
+    LoginResponse loginResponse =
+        new LoginResponse(1L, "testuser", "testuser@example.com", "mocked-jwt-token");
 
-    Mockito.when(userService.loginUser("testuser@example.com", "password123")).thenReturn(user);
+    when(authService.login(Mockito.any())).thenReturn(loginResponse);
 
     mockMvc
         .perform(
@@ -73,7 +79,5 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.email").value("testuser@example.com"))
         .andExpect(jsonPath("$.password").doesNotExist())
         .andExpect(jsonPath("$.passwordHash").doesNotExist());
-
-    Mockito.verify(userService).loginUser("testuser@example.com", "password123");
   }
 }
