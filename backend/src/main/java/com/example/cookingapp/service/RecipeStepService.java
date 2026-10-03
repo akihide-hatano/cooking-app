@@ -16,6 +16,7 @@ public class RecipeStepService {
 
   private final RecipeRepository recipeRepository;
   private final RecipeStepRepository recipeStepRepository;
+  private final RecipeService recipeService;
 
   @Transactional
   public RecipeStep createRecipeStep(Long recipeId, String description, Integer sortOrder) {
@@ -24,7 +25,6 @@ public class RecipeStepService {
         recipeRepository
             .findByIdAndDeletedAtIsNull(recipeId)
             .orElseThrow(() -> new IllegalArgumentException("レシピが存在しません。ID: " + recipeId));
-
     // Recipeの所有者であるか確認し、所有者でない場合は例外をスローする
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -39,5 +39,22 @@ public class RecipeStepService {
     recipeStep.setDescription(description);
     recipeStep.setSortOrder(sortOrder);
     return recipeStepRepository.save(recipeStep);
+  }
+
+  public RecipeStep getRecipeStep(Long recipeId, Long stepId) {
+    // Recipe側のgetRecipeStepメソッドを呼び出して、RecipeStepを取得する
+    Recipe recipe = recipeService.getRecipe(recipeId);
+
+    // RecipeStepが存在するか確認し、存在しない場合は例外をスローする
+    RecipeStep recipeStep =
+        recipeStepRepository
+            .findByIdAndDeletedAtIsNull(stepId)
+            .orElseThrow(() -> new IllegalArgumentException("レシピ手順が存在しません。ID: " + stepId));
+
+    // そのstepが本当にこのrecipeのものか確認する
+    if (!recipeStep.getRecipe().getId().equals(recipe.getId())) {
+      throw new IllegalArgumentException("指定された手順はこのレシピに属していません。");
+    }
+    return recipeStep;
   }
 }

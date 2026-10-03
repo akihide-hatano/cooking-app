@@ -90,7 +90,7 @@ public class RecipeService {
       throw new IllegalArgumentException("このレシピは非公開です");
     }
 
-    // RecipeがvisibilityがFAMILYの場合は、Userがrecipeのfamilyに属していない場合は例外を投げる
+    // RecipeがvisibilityがFAMILYの場合で、Userがrecipeのfamilyに属していない場合は例外を投げる
     List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
     boolean belongsToFamily = false;
 
