@@ -57,4 +57,24 @@ public class RecipeStepService {
     }
     return recipeStep;
   }
+
+  @Transactional
+  public RecipeStep updateRecipeStep(
+      Long recipeId, Long stepId, String description, Integer sortOrder) {
+
+    // Recipe側のgetRecipeStepメソッドを呼び出して、RecipeStepを取得する
+    RecipeStep recipeStep = getRecipeStep(recipeId, stepId);
+
+    // 自分のレシピかどうか確認する
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Long userId = Long.parseLong(authentication.getPrincipal().toString());
+    if (!recipeStep.getRecipe().getUser().getId().equals(userId)) {
+      throw new IllegalArgumentException("このレシピの手順を更新する権限がありません");
+    }
+
+    // recipeStepをsetする
+    recipeStep.setDescription(description);
+    recipeStep.setSortOrder(sortOrder);
+    return recipeStepRepository.save(recipeStep);
+  }
 }
