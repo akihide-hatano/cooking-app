@@ -77,4 +77,21 @@ public class RecipeStepService {
     recipeStep.setSortOrder(sortOrder);
     return recipeStepRepository.save(recipeStep);
   }
+
+  @Transactional
+  public void deleteRecipeStep(Long recipeId, Long stepId) {
+    // Recipe側のgetRecipeStepメソッドを呼び出して、RecipeStepを取得する
+    RecipeStep recipeStep = getRecipeStep(recipeId, stepId);
+
+    // 自分のレシピかどうか確認する
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Long userId = Long.parseLong(authentication.getPrincipal().toString());
+    if (!recipeStep.getRecipe().getUser().getId().equals(userId)) {
+      throw new IllegalArgumentException("このレシピの手順を削除する権限がありません");
+    }
+
+    // deletedAtに現在時刻をセットして論理削除する
+    recipeStep.setDeletedAt(java.time.LocalDateTime.now());
+    recipeStepRepository.save(recipeStep);
+  }
 }
