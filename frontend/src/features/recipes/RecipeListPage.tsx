@@ -48,11 +48,22 @@ export default function RecipeListPage() {
         <div className="mb-6 flex justify-end">
           <PrimaryButton fullWidth={false}>＋ 料理を追加する</PrimaryButton>
         </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-          {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
-        </div>
+        {recipes.length === 0 ? (
+          <div className="rounded-card bg-white px-6 py-16 text-center">
+            <p className="mb-2 text-sm font-bold text-text-main">
+              レシピがありません
+            </p>
+            <p className="text-sm text-text-muted">
+              まずはレシピを追加してみましょう
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            {recipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
