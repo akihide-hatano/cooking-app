@@ -1,6 +1,6 @@
+import { Link } from "react-router-dom";
 import type { Recipe } from "../../types/Recipe";
 import RecipeCard from "./components/RecipeCard";
-import PrimaryButton from "../../components/ui/PrimaryButton";
 
 const recipes: Recipe[] = [
   {
@@ -45,8 +45,19 @@ export default function RecipeListPage() {
             <span className="text-xs">品</span>
           </div>
         </div>
-        <div className="mb-6 flex justify-end">
-          <PrimaryButton fullWidth={false}>＋ 料理を追加する</PrimaryButton>
+        <div className="mb-6 flex w-full justify-center lg:justify-end">
+          <Link
+            to="/recipes/new"
+            className="
+      flex h-13 w-full items-center justify-center
+      rounded-button bg-brand px-6
+      font-bold text-white shadow-sm
+      transition-colors hover:bg-brand-dark
+      lg:w-auto
+    "
+          >
+            ＋ 料理を追加する
+          </Link>
         </div>
         {recipes.length === 0 ? (
           <div className="rounded-card bg-white px-6 py-16 text-center">

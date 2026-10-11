@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Recipe } from "../../../types/Recipe";
 
 type RecipeCardProps = {
@@ -32,9 +33,12 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           {recipe.description}
         </p>
 
-        <span className="mt-auto pt-4 text-sm font-bold text-brand">
+        <Link
+          to={`/recipes/${recipe.id}`}
+          className="mt-auto pt-4 text-sm font-bold text-brand"
+        >
           詳しく見る →
-        </span>
+        </Link>
       </div>
     </article>
   );
