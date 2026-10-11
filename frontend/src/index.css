@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+/* 料理アプリ共通デザイン */
+@theme {
+  /* メインカラー */
+  --color-brand: #386641;
+  --color-brand-dark: #294f32;
+  --color-brand-light: #e9f0e9;
+
+  /* 背景色 */
+  --color-cream: #faf8f3;
+  --color-surface: #ffffff;
+
+  /* 文字色 */
+  --color-text-main: #292d2a;
+  --color-text-muted: #666d67;
+
+  /* 枠線 */
+  --color-border-soft: #e5e7e2;
+
+  /* 角丸 */
+  --radius-card: 16px;
+  --radius-button: 12px;
+}
