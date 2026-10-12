@@ -8,6 +8,7 @@ import com.example.cookingapp.dto.UpdateRecipeResponse;
 import com.example.cookingapp.entity.Recipe;
 import com.example.cookingapp.service.RecipeService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,22 @@ public class RecipeController {
             recipe.getVisibility());
 
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @GetMapping
+  public ResponseEntity<List<GetRecipeResponse>> getAllRecipes() {
+    List<Recipe> recipes = recipeService.getAllRecipes();
+    List<GetRecipeResponse> response = recipes.stream().map(this::convert).toList();
+    return ResponseEntity.ok(response);
+  }
+
+  private GetRecipeResponse convert(Recipe recipe) {
+    return new GetRecipeResponse(
+        recipe.getId(),
+        recipe.getName(),
+        recipe.getDescription(),
+        recipe.getCookedDate(),
+        recipe.getVisibility());
   }
 
   @GetMapping("{id}")
