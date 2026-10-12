@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { LoginPage } from "./features/auth/LoginPage";
 import { RegisterPage } from "./features/auth/RegisterPage";
 import RecipeListPage from "./features/recipes/RecipeListPage";
+import RecipeCreatePage from "./features/recipes/RecipeCreatePage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         <Route path="/recipes" element={<RecipeListPage />} />
+        <Route path="/recipes/new" element={<RecipeCreatePage />} />
       </Routes>
     </BrowserRouter>
   );
