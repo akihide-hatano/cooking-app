@@ -45,12 +45,14 @@ public class RecipeService {
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
 
     // Userがfamilyに属していない場合は例外を投げる
-    if (!familyMemberRepository.existsByUserId(userIdLong)) {
+    if (!familyMemberRepository.existsByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(
+        userIdLong)) {
       throw new IllegalArgumentException("ユーザーは家族に属していません");
     }
 
     // ListにてUserの家族を取得する
-    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(userIdLong);
     FamilyMember familyMember = familyMembers.get(0);
     Family family = familyMember.getFamily();
 
@@ -65,6 +67,36 @@ public class RecipeService {
 
     Recipe savedRecipe = recipeRepository.save(recipe);
     return savedRecipe;
+  }
+
+  // recipeRepositoryを使って全てのrecipeを取得するメソッドを作成する
+  public List<Recipe> getAllRecipes() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    // userIdを取得する
+    String userId = authentication.getPrincipal().toString();
+
+    // Longに変換する
+    Long userIdLong = Long.parseLong(userId);
+
+    // 所属家族を取得
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(userIdLong);
+
+    // 所属家族のIDを取得する
+    List<Long> familyIds =
+        familyMembers.stream().map(member -> member.getFamily().getId()).toList();
+
+    // 家族未所属の場合は、IN句に空リストを渡さないよう存在しない家族IDを指定する
+    List<Long> queryFamilyIds = familyIds.isEmpty() ? List.of(-1L) : familyIds;
+
+    // 所属家族のIDを使って、表示可能なレシピを取得する
+    return recipeRepository.findVisibleRecipes(
+        userIdLong,
+        queryFamilyIds,
+        RecipeVisibility.PUBLIC,
+        RecipeVisibility.FAMILY,
+        RecipeVisibility.PRIVATE);
   }
 
   // recipeRepositoryを使ってrecipeを取得するメソッドを作成する
@@ -91,7 +123,8 @@ public class RecipeService {
     }
 
     // RecipeがvisibilityがFAMILYの場合で、Userがrecipeのfamilyに属していない場合は例外を投げる
-    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(userIdLong);
     boolean belongsToFamily = false;
 
     for (FamilyMember familyMember : familyMembers) {

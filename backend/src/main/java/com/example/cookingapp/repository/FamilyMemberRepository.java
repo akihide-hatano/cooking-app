@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FamilyMemberRepository extends JpaRepository<FamilyMember, Long> {
 
-  List<FamilyMember> findByUserId(Long userId);
+  List<FamilyMember> findByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(Long userId);
 
-  boolean existsByUserId(Long userId);
+  boolean existsByUserIdAndDeletedAtIsNullAndFamilyDeletedAtIsNull(Long userId);
 }
