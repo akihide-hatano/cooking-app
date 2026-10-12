@@ -45,12 +45,13 @@ public class RecipeService {
             .orElseThrow(() -> new IllegalArgumentException("ユーザーが見つかりません"));
 
     // Userがfamilyに属していない場合は例外を投げる
-    if (!familyMemberRepository.existsByUserId(userIdLong)) {
+    if (!familyMemberRepository.existsByUserIdAndDeletedAtIsNull(userIdLong)) {
       throw new IllegalArgumentException("ユーザーは家族に属していません");
     }
 
     // ListにてUserの家族を取得する
-    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNull(userIdLong);
     FamilyMember familyMember = familyMembers.get(0);
     Family family = familyMember.getFamily();
 
@@ -78,7 +79,8 @@ public class RecipeService {
     Long userIdLong = Long.parseLong(userId);
 
     // 所属家族を取得
-    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNull(userIdLong);
 
     // 所属家族のIDを取得する
     List<Long> familyIds =
@@ -120,7 +122,8 @@ public class RecipeService {
     }
 
     // RecipeがvisibilityがFAMILYの場合で、Userがrecipeのfamilyに属していない場合は例外を投げる
-    List<FamilyMember> familyMembers = familyMemberRepository.findByUserId(userIdLong);
+    List<FamilyMember> familyMembers =
+        familyMemberRepository.findByUserIdAndDeletedAtIsNull(userIdLong);
     boolean belongsToFamily = false;
 
     for (FamilyMember familyMember : familyMembers) {
