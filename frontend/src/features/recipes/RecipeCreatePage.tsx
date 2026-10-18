@@ -1,4 +1,5 @@
 import type { Recipe } from "../../types/Recipe";
+import { createRecipe } from "../../api/recipes";
 import { useEffect, useState } from "react";
 import BackButton from "../../components/ui/BackButton";
 import PrimaryButton from "../../components/ui/PrimaryButton";
@@ -20,15 +21,20 @@ export default function RecipeCreatePage() {
     };
   }, [imagePreviewUrl]);
 
-  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    // ここにフォーム送信時の処理を追加
-    console.log("料理名", name);
-    console.log("料理の説明", description);
-    console.log("調理日", cookDate);
-    console.log("公開範囲", visibility);
-    console.log("画像プレビューURL", imagePreviewUrl);
+    try {
+      const recipeData = {
+        name,
+        description,
+        cookedDate: cookDate,
+        visibility,
+      };
+      const createdRecipe = await createRecipe(recipeData);
+      console.log("作成されたレシピ", createdRecipe);
+    } catch (error) {
+      console.error("レシピの作成に失敗しました", error);
+    }
   }
 
   return (

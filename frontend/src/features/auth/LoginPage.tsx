@@ -1,15 +1,20 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { login } from "../../api/auth";
+
+import { saveToken } from "../../utils/tokenStorage";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     // Implement login logic here
     try {
       const response = await login({ email, password });
-      console.log("Login successful:", response);
+      saveToken(response.token);
+      navigate("/recipes/new");
     } catch (error) {
       console.error("Login failed:", error);
     }
