@@ -101,8 +101,7 @@ class UserServiceUpdateTest {
     User updateUser = new User("更新ユーザー", "update@example.com", "new-hashed-password");
 
     // IDが存在することにする
-    Mockito.when(userRepository.findById(1L))
-        .thenReturn(Optional.of(new User("既存ユーザー", "test@example.com", "hashed-password")));
+    Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
 
     // emailが既に存在することにする
     Mockito.when(userRepository.findByEmail("update@example.com"))
