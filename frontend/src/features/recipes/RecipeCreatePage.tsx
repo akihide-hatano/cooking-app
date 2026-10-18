@@ -22,12 +22,13 @@ export default function RecipeCreatePage() {
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    // ここにフォーム送信時の処理を追加
 
+    // ここにフォーム送信時の処理を追加
     console.log("料理名", name);
     console.log("料理の説明", description);
     console.log("調理日", cookDate);
     console.log("公開範囲", visibility);
+    console.log("画像プレビューURL", imagePreviewUrl);
   }
 
   return (
@@ -69,7 +70,7 @@ export default function RecipeCreatePage() {
           <label htmlFor="cookDate" className="block  font-bold">
             調理日
           </label>
-          <span className="rounded bg-gray-100 px-2 py-1 text-xs font-bold text-gray-600">
+          <span className="rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-600">
             必須
           </span>
         </div>
@@ -79,16 +80,19 @@ export default function RecipeCreatePage() {
           value={cookDate}
           onChange={(e) => setCookDate(e.target.value)}
           className="w-full rounded-lg border border-green-700 bg-white p-3 mb-2"
+          required
         />
 
-        <div className="my-4">
-          <div className="flex items-center gap-3 mb-2">
-            <p className="font-bold">公開範囲</p>
-            <span className="rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-600">
-              必須
+        <fieldset className="my-4">
+          <legend className="mb-2 font-bold">
+            <span className="inline-flex items-center gap-3">
+              <span>公開範囲</span>
+              <span className="rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-600">
+                必須
+              </span>
             </span>
-          </div>
-          <p className="mb-2 text-sm text-gray-500">
+          </legend>
+          <p id="visibility-description" className="mb-2 text-sm text-gray-500">
             この料理を見られる人を選びます
           </p>
           <div className="space-y-2">
@@ -153,7 +157,7 @@ export default function RecipeCreatePage() {
               <label htmlFor="visibility-public">公開</label>
             </div>
           </div>
-        </div>
+        </fieldset>
 
         <label htmlFor="imageFile" className="block mb-2 font-bold">
           料理の画像
