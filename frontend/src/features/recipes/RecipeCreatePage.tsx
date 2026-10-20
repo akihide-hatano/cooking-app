@@ -43,7 +43,11 @@ export default function RecipeCreatePage() {
       navigate(`/recipes/${createdRecipe.id}`);
     } catch (error) {
       console.error("レシピの作成に失敗しました", error);
-      setErrMessage("レシピの作成に失敗しました");
+      if (error instanceof Error) {
+        setErrMessage(error.message);
+      } else {
+        setErrMessage("レシピの作成に失敗しました");
+      }
     } finally {
       setIsSubmitting(false);
     }

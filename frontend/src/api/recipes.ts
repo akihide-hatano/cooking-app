@@ -1,5 +1,5 @@
 import type { CreateRecipeRequest } from "../types/CreateRecipeRequest";
-import { getToken } from "../utils/tokenStorage";
+import { getToken, removeToken } from "../utils/tokenStorage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,6 +17,11 @@ export const createRecipe = async (recipeData: CreateRecipeRequest) => {
     },
     body: JSON.stringify(recipeData),
   });
+
+  if (response.status === 401) {
+    removeToken();
+    throw new Error("認証に失敗しました。ログインが必要です");
+  }
 
   if (!response.ok) {
     throw new Error("レシピの作成に失敗しました");
