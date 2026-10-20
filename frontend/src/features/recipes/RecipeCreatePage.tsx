@@ -1,16 +1,21 @@
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import type { Recipe } from "../../types/Recipe";
+import { createRecipe } from "../../api/recipes";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BackButton from "../../components/ui/BackButton";
 import PrimaryButton from "../../components/ui/PrimaryButton";
 import type { SubmitEvent } from "react";
 
 export default function RecipeCreatePage() {
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [cookDate, setCookDate] = useState("");
   const [visibility, setVisibility] = useState<Recipe["visibility"]>("FAMILY");
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errMessage, setErrMessage] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -20,21 +25,46 @@ export default function RecipeCreatePage() {
     };
   }, [imagePreviewUrl]);
 
-  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    // ここにフォーム送信時の処理を追加
-    console.log("料理名", name);
-    console.log("料理の説明", description);
-    console.log("調理日", cookDate);
-    console.log("公開範囲", visibility);
-    console.log("画像プレビューURL", imagePreviewUrl);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrMessage(null);
+    try {
+      const recipeData = {
+        name,
+        description,
+        cookedDate: cookDate,
+        visibility,
+      };
+      const createdRecipe = await createRecipe(recipeData);
+      console.log("送信データ", recipeData);
+      console.log("作成されたレシピ", createdRecipe);
+      navigate(`/recipes/${createdRecipe.id}`);
+    } catch (error) {
+      console.error("レシピの作成に失敗しました", error);
+      if (error instanceof Error) {
+        setErrMessage(error.message);
+      } else {
+        setErrMessage("レシピの作成に失敗しました");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <main className="mx-auto max-w-md px-4 py-6">
       <BackButton />
       <h1 className="text-2xl font-bold m-4">レシピを登録する</h1>
+      {errMessage && (
+        <p
+          role="alert"
+          className="rounded bg-red-100 px-2 py-1 text-xs font-bold text-red-600"
+        >
+          {errMessage}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="flex items-center gap-3 mb-2">
@@ -187,7 +217,16 @@ export default function RecipeCreatePage() {
           </div>
         )}
 
-        <PrimaryButton type="submit">料理を登録する</PrimaryButton>
+        <PrimaryButton type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner />
+              <span className="ml-2">登録中...</span>
+            </>
+          ) : (
+            "料理を登録する"
+          )}
+        </PrimaryButton>
       </form>
     </main>
   );
