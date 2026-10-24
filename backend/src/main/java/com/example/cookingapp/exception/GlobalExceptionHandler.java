@@ -26,4 +26,12 @@ public class GlobalExceptionHandler {
     System.out.println("★ MethodArgumentNotValidException: " + message);
     return ResponseEntity.badRequest().body(Map.of("error", message));
   }
+
+  @ExceptionHandler(RecipeNotFoundException.class)
+  public ResponseEntity<Map<String, String>> handleRecipeNotFoundException(
+      RecipeNotFoundException exception) {
+
+    System.out.println("★ RecipeNotFoundException: " + exception.getMessage());
+    return ResponseEntity.status(404).body(Map.of("error", exception.getMessage()));
+  }
 }
