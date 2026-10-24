@@ -3,21 +3,23 @@ package com.example.cookingapp.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
 
-  private static final String SECRET_KEY = "cooking-app-secret-key-for-jwt-authentication-2026"; //
+  private final SecretKey key;
+
+  public JwtService(@Value("${JWT_SECRET}") String secret) {
+    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+  }
+
   private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 1日
 
   public String generateToken(Long userId) {
-
-    Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-
     return Jwts.builder()
         .subject(userId.toString())
         .issuedAt(new Date())
@@ -27,9 +29,6 @@ public class JwtService {
   }
 
   public String extractUserId(String token) {
-
-    SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-
-    return Jwts.parser().verifyWith(key).build().parseClaimsJws(token).getPayload().getSubject();
+    return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
   }
 }

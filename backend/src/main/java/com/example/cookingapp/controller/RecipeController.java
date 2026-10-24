@@ -3,9 +3,12 @@ package com.example.cookingapp.controller;
 import com.example.cookingapp.dto.CreateRecipeRequest;
 import com.example.cookingapp.dto.CreateRecipeResponse;
 import com.example.cookingapp.dto.GetRecipeResponse;
+import com.example.cookingapp.dto.RecipeDetailResponse;
+import com.example.cookingapp.dto.RecipeStepResponse;
 import com.example.cookingapp.dto.UpdateRecipeRequest;
 import com.example.cookingapp.dto.UpdateRecipeResponse;
 import com.example.cookingapp.entity.Recipe;
+import com.example.cookingapp.service.RecipeDetailData;
 import com.example.cookingapp.service.RecipeService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -66,17 +69,28 @@ public class RecipeController {
         recipe.getVisibility());
   }
 
-  @GetMapping("{id}")
-  public ResponseEntity<GetRecipeResponse> getRecipeById(@PathVariable Long id) {
+  @GetMapping("/{id}")
+  public ResponseEntity<RecipeDetailResponse> getRecipeById(@PathVariable Long id) {
 
-    Recipe recipe = recipeService.getRecipe(id);
-    GetRecipeResponse response =
-        new GetRecipeResponse(
+    RecipeDetailData data = recipeService.getRecipeDetail(id);
+    Recipe recipe = data.recipe();
+
+    List<RecipeStepResponse> steps =
+        data.steps().stream()
+            .map(
+                step ->
+                    new RecipeStepResponse(
+                        step.getId(), step.getDescription(), step.getSortOrder()))
+            .toList();
+    RecipeDetailResponse response =
+        new RecipeDetailResponse(
             recipe.getId(),
             recipe.getName(),
             recipe.getDescription(),
             recipe.getCookedDate(),
-            recipe.getVisibility());
+            recipe.getVisibility(),
+            recipe.getImageUrl(),
+            steps);
     return ResponseEntity.ok(response);
   }
 

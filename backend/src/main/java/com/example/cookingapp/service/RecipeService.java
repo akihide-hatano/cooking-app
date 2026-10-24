@@ -4,10 +4,13 @@ import com.example.cookingapp.dto.UpdateRecipeRequest;
 import com.example.cookingapp.entity.Family;
 import com.example.cookingapp.entity.FamilyMember;
 import com.example.cookingapp.entity.Recipe;
+import com.example.cookingapp.entity.RecipeStep;
 import com.example.cookingapp.entity.RecipeVisibility;
 import com.example.cookingapp.entity.User;
+import com.example.cookingapp.exception.RecipeNotFoundException;
 import com.example.cookingapp.repository.FamilyMemberRepository;
 import com.example.cookingapp.repository.RecipeRepository;
+import com.example.cookingapp.repository.RecipeStepRepository;
 import com.example.cookingapp.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +27,7 @@ public class RecipeService {
   private final RecipeRepository recipeRepository;
   private final UserRepository userRepository;
   private final FamilyMemberRepository familyMemberRepository;
+  private final RecipeStepRepository recipeStepRepository;
 
   // recipeRepositoryを使ってrecipeを作成するメソッドを作成する
   public Recipe createRecipe(
@@ -105,7 +109,7 @@ public class RecipeService {
     Recipe recipe =
         recipeRepository
             .findByIdAndDeletedAtIsNull(recipeId)
-            .orElseThrow(() -> new IllegalArgumentException("レシピが見つかりません"));
+            .orElseThrow(() -> new RecipeNotFoundException("レシピが見つかりません"));
 
     // Authenticationからユーザーを取得する
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -119,7 +123,7 @@ public class RecipeService {
     // RecipeがvisibilityがPRIVATEの場合は、Userがrecipeのuserと同じでない場合は例外を投げる
     RecipeVisibility visibility = recipe.getVisibility();
     if (visibility == RecipeVisibility.PRIVATE && !recipe.getUser().getId().equals(userIdLong)) {
-      throw new IllegalArgumentException("このレシピは非公開です");
+      throw new RecipeNotFoundException("レシピが見つかりません");
     }
 
     // RecipeがvisibilityがFAMILYの場合で、Userがrecipeのfamilyに属していない場合は例外を投げる
@@ -134,7 +138,7 @@ public class RecipeService {
       }
     }
     if (visibility == RecipeVisibility.FAMILY && !belongsToFamily) {
-      throw new IllegalArgumentException("このレシピは家族限定です");
+      throw new RecipeNotFoundException("レシピが見つかりません");
     }
     return recipe;
   }
@@ -194,5 +198,18 @@ public class RecipeService {
     recipe.setDeletedAt(LocalDateTime.now());
 
     recipeRepository.save(recipe);
+  }
+
+  // recipeの詳細を取得して表示
+  public RecipeDetailData getRecipeDetail(Long recipeid) {
+
+    // recipeIdから料理を取得し、userIdの認可も確認
+    Recipe recipe = getRecipe(recipeid);
+
+    // repositoryから料理手順を取得する
+    List<RecipeStep> recipeSteps =
+        recipeStepRepository.findByRecipeIdAndDeletedAtIsNullOrderBySortOrderAsc(recipeid);
+
+    return new RecipeDetailData(recipe, recipeSteps);
   }
 }

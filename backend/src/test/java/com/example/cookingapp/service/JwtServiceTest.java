@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 
 public class JwtServiceTest {
 
-  private final JwtService jwtService = new JwtService();
+  private final JwtService jwtService =
+      new JwtService("test-secret-key-for-jwt-unit-test-1234567890");
 
   @Test
   void testGenerateToken() {
-
     String token = jwtService.generateToken(1L);
     assertNotNull(token);
     assertFalse(token.isBlank());
@@ -20,7 +20,6 @@ public class JwtServiceTest {
 
   @Test
   void testGetUserIdFromJwt() {
-
     String token = jwtService.generateToken(1L);
     String userId = jwtService.extractUserId(token);
     assertEquals("1", userId);
