@@ -1,13 +1,17 @@
 package com.example.cookingapp.service;
 
+import com.example.cookingapp.dto.RecipeDetailResponse;
+import com.example.cookingapp.dto.RecipeStepResponse;
 import com.example.cookingapp.dto.UpdateRecipeRequest;
 import com.example.cookingapp.entity.Family;
 import com.example.cookingapp.entity.FamilyMember;
 import com.example.cookingapp.entity.Recipe;
+import com.example.cookingapp.entity.RecipeStep;
 import com.example.cookingapp.entity.RecipeVisibility;
 import com.example.cookingapp.entity.User;
 import com.example.cookingapp.repository.FamilyMemberRepository;
 import com.example.cookingapp.repository.RecipeRepository;
+import com.example.cookingapp.repository.RecipeStepRepository;
 import com.example.cookingapp.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +28,7 @@ public class RecipeService {
   private final RecipeRepository recipeRepository;
   private final UserRepository userRepository;
   private final FamilyMemberRepository familyMemberRepository;
+  private final RecipeStepRepository recipeStepRepository;
 
   // recipeRepositoryを使ってrecipeを作成するメソッドを作成する
   public Recipe createRecipe(
@@ -194,5 +199,38 @@ public class RecipeService {
     recipe.setDeletedAt(LocalDateTime.now());
 
     recipeRepository.save(recipe);
+  }
+
+  // recipeの詳細を取得して表示
+  public RecipeDetailResponse getRecipeDetail(Long recipeid) {
+
+    // recipeIdから料理を取得し、userIdの認可も確認
+    Recipe recipe = getRecipe(recipeid);
+
+    // reposityから料理手順を取得する
+    List<RecipeStep> recipeSteps =
+        recipeStepRepository.findByRecipeIdAndDeletedAtIsNullOrderBySortOrderAsc(recipeid);
+
+    // ③ 手順をDTOに変換
+    List<RecipeStepResponse> steps =
+        recipeSteps.stream()
+            .map(
+                step ->
+                    new RecipeStepResponse(
+                        step.getId(), step.getDescription(), step.getSortOrder()))
+            .toList();
+
+    // ④ 料理と手順をまとめる
+    RecipeDetailResponse response =
+        new RecipeDetailResponse(
+            recipe.getId(),
+            recipe.getName(),
+            recipe.getDescription(),
+            recipe.getCookedDate(),
+            recipe.getVisibility(),
+            recipe.getImageUrl(),
+            steps);
+
+    return response;
   }
 }
