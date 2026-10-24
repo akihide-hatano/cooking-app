@@ -1,7 +1,5 @@
 package com.example.cookingapp.service;
 
-import com.example.cookingapp.dto.RecipeDetailResponse;
-import com.example.cookingapp.dto.RecipeStepResponse;
 import com.example.cookingapp.dto.UpdateRecipeRequest;
 import com.example.cookingapp.entity.Family;
 import com.example.cookingapp.entity.FamilyMember;
@@ -202,35 +200,15 @@ public class RecipeService {
   }
 
   // recipeの詳細を取得して表示
-  public RecipeDetailResponse getRecipeDetail(Long recipeid) {
+  public RecipeDetailData getRecipeDetail(Long recipeid) {
 
     // recipeIdから料理を取得し、userIdの認可も確認
     Recipe recipe = getRecipe(recipeid);
 
-    // reposityから料理手順を取得する
+    // repositoryから料理手順を取得する
     List<RecipeStep> recipeSteps =
         recipeStepRepository.findByRecipeIdAndDeletedAtIsNullOrderBySortOrderAsc(recipeid);
 
-    // ③ 手順をDTOに変換
-    List<RecipeStepResponse> steps =
-        recipeSteps.stream()
-            .map(
-                step ->
-                    new RecipeStepResponse(
-                        step.getId(), step.getDescription(), step.getSortOrder()))
-            .toList();
-
-    // ④ 料理と手順をまとめる
-    RecipeDetailResponse response =
-        new RecipeDetailResponse(
-            recipe.getId(),
-            recipe.getName(),
-            recipe.getDescription(),
-            recipe.getCookedDate(),
-            recipe.getVisibility(),
-            recipe.getImageUrl(),
-            steps);
-
-    return response;
+    return new RecipeDetailData(recipe, recipeSteps);
   }
 }
