@@ -18,18 +18,29 @@ export default function RecipeDetailPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let active = true;
+    setRecipe(null);
+    setError(null);
+
     if (id) {
       getRecipeDetail(Number(id))
-        .then(setRecipe)
+        .then((result) => {
+          if (active) setRecipe(result);
+        })
         .catch((error: unknown) => {
+          if (!active) return;
           console.error(error);
-          if (error instanceof Error) {
-            setError(error.message);
-          } else {
-            setError("レシピの取得に失敗しました");
-          }
+          setError(
+            error instanceof Error
+              ? error.message
+              : "レシピの取得に失敗しました",
+          );
         });
     }
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   if (error) {
