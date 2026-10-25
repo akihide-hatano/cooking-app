@@ -1,3 +1,5 @@
+import type { RecipeVisibility } from "./RecipeVisibility";
+
 export type RecipeStep = {
   id: number;
   description: string;
@@ -9,7 +11,7 @@ export type RecipeDetail = {
   name: string;
   description: string;
   cookedDate: string | null;
-  visibility: "PRIVATE" | "FAMILY" | "PUBLIC";
+  visibility: RecipeVisibility;
   imageUrl: string | null;
   steps: RecipeStep[];
 };
