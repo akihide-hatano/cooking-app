@@ -49,6 +49,14 @@ export const getRecipeDetail = async (id: number): Promise<RecipeDetail> => {
     throw new Error("認証に失敗しました。ログインが必要です");
   }
 
+  if (response.status === 403) {
+    throw new Error("このレシピを閲覧する権限がありません");
+  }
+
+  if (response.status === 404) {
+    throw new Error("レシピが見つかりません");
+  }
+
   if (!response.ok) {
     throw new Error("レシピの取得に失敗しました");
   }

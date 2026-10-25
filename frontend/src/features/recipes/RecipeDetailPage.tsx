@@ -21,15 +21,37 @@ export default function RecipeDetailPage() {
     if (id) {
       getRecipeDetail(Number(id))
         .then(setRecipe)
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error(error);
-          setError("レシピの取得に失敗しました");
+          if (error instanceof Error) {
+            setError(error.message);
+          } else {
+            setError("レシピの取得に失敗しました");
+          }
         });
     }
   }, [id]);
 
   if (error) {
-    return <p>{error}</p>;
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-cream px-4">
+        <div className="w-full max-w-md rounded-card border border-border-soft bg-surface p-8 text-center">
+          <h1 className="text-xl font-bold text-text-main">
+            レシピを表示できません
+          </h1>
+
+          <p role="alert" className="mt-4 text-text-muted">
+            {error}
+          </p>
+
+          <div className="mt-6">
+            <PrimaryButton onClick={() => navigate("/recipes")}>
+              レシピ一覧に戻る
+            </PrimaryButton>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   if (!recipe) {
@@ -122,8 +144,7 @@ export default function RecipeDetailPage() {
               />
               <div className="mt-2 flex justify-end gap-2">
                 <ActionButton
-                  disabled:cursor-not-allowed
-                  disabled:opacity-50
+                  disabled={!newStep}
                   onClick={() => {
                     // ここで新しい手順を追加する処理を実装
                     setIsAddingStep(false);
@@ -140,11 +161,11 @@ export default function RecipeDetailPage() {
                   }}
 
                   className="
-    flex h-13 w-full items-center justify-center
-    rounded-button border border-border-soft
-    bg-white px-6 font-bold text-text-main
-    transition-colors hover:bg-cream
-  "
+                              flex h-13 w-full items-center justify-center
+                              rounded-button border border-border-soft
+                              bg-white px-6 font-bold text-text-main
+                              transition-colors hover:bg-cream
+                            "
                 >
                   キャンセル
                 </button>
