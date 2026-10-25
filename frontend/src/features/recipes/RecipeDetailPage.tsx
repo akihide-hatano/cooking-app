@@ -19,13 +19,12 @@ export default function RecipeDetailPage() {
 
   useEffect(() => {
     let active = true;
-    setRecipe(null);
-    setError(null);
-
     if (id) {
       getRecipeDetail(Number(id))
-        .then((result) => {
-          if (active) setRecipe(result);
+        .then((data) => {
+          if (active) {
+            setRecipe(data);
+          }
         })
         .catch((error: unknown) => {
           if (!active) return;
@@ -37,7 +36,6 @@ export default function RecipeDetailPage() {
           );
         });
     }
-
     return () => {
       active = false;
     };
