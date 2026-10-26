@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import RecipeListPage from "./features/recipes/RecipeListPage";
 import RecipeCreatePage from "./features/recipes/RecipeCreatePage";
 import RecipeDetailPage from "./features/recipes/RecipeDetailPage";
-
+import RecipeEditPage from "./features/recipes/RecipeEditPage";
 function RecipeDetailRoute() {
   const { id } = useParams<{ id: string }>();
 
@@ -21,7 +21,7 @@ function App() {
         <Route path="/recipes" element={<RecipeListPage />} />
         <Route path="/recipes/new" element={<RecipeCreatePage />} />
         <Route path="/recipes/:id" element={<RecipeDetailRoute />} />
-        <Route path="/recipes/:id/edit" element={<RecipeCreatePage />} />
+        <Route path="/recipes/:id/edit" element={<RecipeEditPage />} />
       </Routes>
     </BrowserRouter>
   );
