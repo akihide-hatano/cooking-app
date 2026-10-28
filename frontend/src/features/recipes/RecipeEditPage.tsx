@@ -1,4 +1,4 @@
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useEffect, useState, useRef, type SubmitEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getRecipeDetail, updateRecipe } from "../../api/recipes";
 import type { UpdateRecipeRequest } from "../../types/UpdateRecipeRequest";
@@ -26,6 +26,16 @@ export default function RecipeEditPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  //画面が存在しているかを確認する
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -38,13 +48,25 @@ export default function RecipeEditPage() {
 
     try {
       await updateRecipe(recipeId, form);
+
+      // すでに編集画面を離れていたら終了
+      if (!isMounted.current) {
+        return;
+      }
+
       navigate(`/recipes/${recipeId}`);
     } catch (error) {
+      // すでに編集画面を離れていたら終了
+      if (!isMounted.current) {
+        return;
+      }
       setSaveError(
         error instanceof Error ? error.message : "レシピの更新に失敗しました",
       );
     } finally {
-      setIsSubmitting(false);
+      if (isMounted.current) {
+        setIsSubmitting(false);
+      }
     }
   }
 
