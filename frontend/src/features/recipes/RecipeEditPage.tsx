@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getRecipeDetail } from "../../api/recipes";
+import { getRecipeDetail, updateRecipe } from "../../api/recipes";
 import type { UpdateRecipeRequest } from "../../types/UpdateRecipeRequest";
 import BackButton from "../../components/ui/BackButton";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import PrimaryButton from "../../components/ui/PrimaryButton";
 
 export default function RecipeEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,9 +23,32 @@ export default function RecipeEditPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errMessage, setErrMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const recipeId = Number(id);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!isValidId || isSubmitting || isLoading) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSaveError(null);
+
+    try {
+      await updateRecipe(recipeId, form);
+      navigate(`/recipes/${recipeId}`);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "レシピの更新に失敗しました",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  useEffect(() => {
     if (!isValidId) {
       return;
     }
@@ -62,7 +86,7 @@ export default function RecipeEditPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, isValidId]);
+  }, [recipeId, isValidId]);
 
   if (!isValidId) {
     return (
@@ -100,7 +124,7 @@ export default function RecipeEditPage() {
       <BackButton />
       <h1 className="m-4 text-2xl font-bold">レシピを編集する</h1>
 
-      <form>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="name">料理名</label>
         <input
           id="name"
@@ -130,29 +154,48 @@ export default function RecipeEditPage() {
         />
 
         <fieldset className="my-4">
-          <legend className="font-bold">公開範囲</legend>
-          {(["FAMILY", "PRIVATE", "PUBLIC"] as const).map((value) => (
-            <label key={value} className="block p-2">
-              <input
-                type="radio"
-                name="visibility"
-                value={value}
-                checked={form.visibility === value}
-                onChange={() => setForm({ ...form, visibility: value })}
-                className="mr-2"
-              />
-              {value === "FAMILY"
-                ? "家族のみ"
-                : value === "PRIVATE"
-                  ? "自分のみ"
-                  : "公開"}
-            </label>
-          ))}
+          <legend className="mb-2 font-bold">公開範囲</legend>
+
+          <div className="space-y-2">
+            {(["FAMILY", "PRIVATE", "PUBLIC"] as const).map((value) => (
+              <label
+                key={value}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 ${
+                  form.visibility === value
+                    ? "border-brand bg-brand/20 font-bold"
+                    : "border-gray-300 bg-white"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="visibility"
+                  value={value}
+                  checked={form.visibility === value}
+                  onChange={() =>
+                    setForm((prev) => ({ ...prev, visibility: value }))
+                  }
+                  className="accent-brand"
+                />
+
+                {value === "FAMILY"
+                  ? "家族のみ"
+                  : value === "PRIVATE"
+                    ? "自分のみ"
+                    : "公開"}
+              </label>
+            ))}
+          </div>
         </fieldset>
 
-        <button type="button" onClick={() => navigate(`/recipes/${id}`)}>
-          詳細画面に戻る
-        </button>
+        {saveError && (
+          <p role="alert" className="text-red-600">
+            {saveError}
+          </p>
+        )}
+
+        <PrimaryButton type="submit" disabled={isSubmitting} className="mt-4">
+          {isSubmitting ? "保存中..." : "変更を保存する"}
+        </PrimaryButton>
       </form>
     </main>
   );
