@@ -103,3 +103,34 @@ export const updateRecipe = async (
 
   return (await response.json()) as UpdateRecipeResponse;
 };
+
+export const deleteRecipe = async (id: number): Promise<void> => {
+  const token = getToken();
+  if (!token) {
+    throw new Error("ログインが必要です");
+  }
+
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401) {
+    removeToken();
+    throw new Error("認証に失敗しました。ログインが必要です");
+  }
+
+  if (response.status === 403) {
+    throw new Error("このレシピを削除する権限がありません");
+  }
+
+  if (response.status === 404) {
+    throw new Error("レシピが見つかりません");
+  }
+
+  if (!response.ok) {
+    throw new Error("レシピの削除に失敗しました");
+  }
+};

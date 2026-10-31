@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type SubmitEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getRecipeDetail, updateRecipe } from "../../api/recipes";
+import { getRecipeDetail, updateRecipe, deleteRecipe } from "../../api/recipes";
 import type { UpdateRecipeRequest } from "../../types/UpdateRecipeRequest";
 import BackButton from "../../components/ui/BackButton";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -26,6 +26,9 @@ export default function RecipeEditPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   //画面が存在しているかを確認する
   const isMounted = useRef(false);
 
@@ -39,7 +42,7 @@ export default function RecipeEditPage() {
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!isValidId || isSubmitting || isLoading) {
+    if (!isValidId || isSubmitting || isDeleting || isLoading) {
       return;
     }
 
@@ -66,6 +69,39 @@ export default function RecipeEditPage() {
     } finally {
       if (isMounted.current) {
         setIsSubmitting(false);
+      }
+    }
+  }
+
+  async function handleDelete() {
+    if (!isValidId || isSubmitting || isDeleting || isLoading) {
+      return;
+    }
+
+    const confirmed = window.confirm("本当にレシピを削除しますか？");
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await deleteRecipe(recipeId);
+      if (!isMounted.current) {
+        return;
+      }
+      navigate("/recipes");
+    } catch (error) {
+      if (!isMounted.current) {
+        return;
+      }
+      setDeleteError(
+        error instanceof Error ? error.message : "レシピの削除に失敗しました",
+      );
+    } finally {
+      if (isMounted.current) {
+        setIsDeleting(false);
       }
     }
   }
@@ -218,6 +254,29 @@ export default function RecipeEditPage() {
         <PrimaryButton type="submit" disabled={isSubmitting} className="mt-4">
           {isSubmitting ? "保存中..." : "変更を保存する"}
         </PrimaryButton>
+
+        <section className="mt-10 border-t border-gray-300 pt-6">
+          <h2 className="mb-2 text-lg font-bold">料理の削除</h2>
+
+          <p className="mb-4 text-sm text-gray-600">
+            削除した料理は元に戻せません。
+          </p>
+
+          {deleteError && (
+            <p role="alert" className="mb-3 text-red-600">
+              {deleteError}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isSubmitting || isDeleting}
+            className="w-full rounded-lg border-2 border-red-600 p-3 font-bold text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isDeleting ? "削除中..." : "この料理を削除する"}
+          </button>
+        </section>
       </form>
     </main>
   );
