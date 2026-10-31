@@ -1,3 +1,5 @@
+import type { Recipe } from "../types/Recipe";
+import type { GetRecipeResponse } from "../types/GetRecipeResponse";
 import type { CreateRecipeRequest } from "../types/CreateRecipeRequest";
 import type { RecipeDetail } from "../types/RecipeDetail";
 import type { UpdateRecipeRequest } from "../types/UpdateRecipeRequest";
@@ -30,6 +32,41 @@ export const createRecipe = async (recipeData: CreateRecipeRequest) => {
     throw new Error("レシピの作成に失敗しました");
   }
   return response.json();
+};
+
+export const getRecipes = async (): Promise<Recipe[]> => {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("ログインが必要です");
+  }
+
+  const response = await fetch(`${API_URL}/recipes`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401) {
+    removeToken();
+    throw new Error("認証に失敗しました。ログインが必要です");
+  }
+
+  if (!response.ok) {
+    throw new Error("レシピの取得に失敗しました");
+  }
+
+  const data = (await response.json()) as GetRecipeResponse[];
+
+  return data.map((recipe) => ({
+    id: recipe.id,
+    name: recipe.name,
+    description: recipe.description,
+    cookedDate: recipe.cookedDate,
+    visibility: recipe.visibility,
+    imageUrl: null,
+  }));
 };
 
 export const getRecipeDetail = async (id: number): Promise<RecipeDetail> => {
