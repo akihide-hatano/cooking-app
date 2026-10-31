@@ -1,4 +1,4 @@
-import type { RecipeVisibility } from "./types/RecipeVisibility";
+import type { RecipeVisibility } from "./RecipeVisibility";
 
 export type GetRecipeResponse = {
   id: number;
