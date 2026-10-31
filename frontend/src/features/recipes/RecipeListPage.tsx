@@ -1,38 +1,29 @@
 import { Link } from "react-router-dom";
 import type { Recipe } from "../../types/Recipe";
 import RecipeCard from "./components/RecipeCard";
-
-const recipes: Recipe[] = [
-  {
-    id: 1,
-    name: "肉じゃが",
-    description: "母の得意料理",
-    cookedDate: "2026-10-11",
-    visibility: "FAMILY",
-    imageUrl:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Nikujaga.jpg?width=640",
-  },
-  {
-    id: 2,
-    name: "カレーライス",
-    description: "家族みんなが大好きなカレー",
-    cookedDate: "2026-10-10",
-    visibility: "PUBLIC",
-    imageUrl:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Kare-Raisu.jpg?width=640",
-  },
-  {
-    id: 3,
-    name: "だし巻き卵",
-    description: "父の得意料理",
-    cookedDate: null,
-    visibility: "PRIVATE",
-    imageUrl:
-      "https://commons.wikimedia.org/wiki/Special:FilePath/Dashimaki_tamago_by_jetalone_in_Kyobashi%2C_Tokyo.jpg?width=640",
-  },
-];
+import { getRecipes } from "../../api/recipes";
+import { useEffect, useState } from "react";
 
 export default function RecipeListPage() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        const data = await getRecipes();
+        setRecipes(data);
+      } catch (error) {
+        console.error("レシピの取得に失敗しました:", error);
+        setError("レシピの取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadRecipes();
+  }, []);
+
   return (
     <main className="min-h-screen bg-cream px-4 py-6 md:px-8">
       <div className="mx-auto max-w-6xl">
@@ -59,7 +50,15 @@ export default function RecipeListPage() {
             ＋ 料理を追加する
           </Link>
         </div>
-        {recipes.length === 0 ? (
+        {loading ? (
+          <div className="rounded-card bg-white px-6 py-16 text-center">
+            <p>レシピを読み込み中...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-card bg-white px-6 py-16 text-center">
+            <p>{error}</p>
+          </div>
+        ) : recipes.length === 0 ? (
           <div className="rounded-card bg-white px-6 py-16 text-center">
             <p className="mb-2 text-sm font-bold text-text-main">
               レシピがありません
