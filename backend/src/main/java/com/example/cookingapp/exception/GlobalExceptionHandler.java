@@ -34,4 +34,11 @@ public class GlobalExceptionHandler {
     System.out.println("★ RecipeNotFoundException: " + exception.getMessage());
     return ResponseEntity.status(404).body(Map.of("error", exception.getMessage()));
   }
+
+  @ExceptionHandler(RecipeAccessDeniedException.class)
+  public ResponseEntity<Map<String, String>> handleRecipeAccessDeniedException(
+      RecipeAccessDeniedException exception) {
+
+    return ResponseEntity.status(403).body(Map.of("error", exception.getMessage()));
+  }
 }

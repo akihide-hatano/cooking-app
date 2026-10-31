@@ -7,6 +7,7 @@ import com.example.cookingapp.entity.Recipe;
 import com.example.cookingapp.entity.RecipeStep;
 import com.example.cookingapp.entity.RecipeVisibility;
 import com.example.cookingapp.entity.User;
+import com.example.cookingapp.exception.RecipeAccessDeniedException;
 import com.example.cookingapp.exception.RecipeNotFoundException;
 import com.example.cookingapp.repository.FamilyMemberRepository;
 import com.example.cookingapp.repository.RecipeRepository;
@@ -147,7 +148,7 @@ public class RecipeService {
     Recipe recipe =
         recipeRepository
             .findByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new IllegalArgumentException("レシピが見つかりません"));
+            .orElseThrow(() -> new RecipeNotFoundException("レシピが見つかりません"));
 
     // Authenticationからユーザーを取得する
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -160,7 +161,7 @@ public class RecipeService {
 
     // Userがrecipeのuserと同じでない場合は例外を投げる
     if (!recipe.getUser().getId().equals(userIdLong)) {
-      throw new IllegalArgumentException("このレシピを更新する権限がありません");
+      throw new RecipeAccessDeniedException("このレシピを更新する権限がありません");
     }
 
     recipe.setName(request.getName());
@@ -178,7 +179,7 @@ public class RecipeService {
     Recipe recipe =
         recipeRepository
             .findByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new IllegalArgumentException("レシピが見つかりません"));
+            .orElseThrow(() -> new RecipeNotFoundException("レシピが見つかりません"));
 
     // Authenticationからユーザーを取得する
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -191,7 +192,7 @@ public class RecipeService {
 
     // Userがrecipeのuserと同じでない場合は例外を投げる
     if (!recipe.getUser().getId().equals(userIdLong)) {
-      throw new IllegalArgumentException("このレシピを削除する権限がありません");
+      throw new RecipeAccessDeniedException("このレシピを削除する権限がありません");
     }
 
     // 論理フラグにて削除する場合は日付を入れる
